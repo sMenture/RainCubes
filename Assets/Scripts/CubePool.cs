@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CubePool : MonoBehaviour
 {
-    [SerializeField] private GameObject _cubePrefab;
+    [SerializeField] private Cube _cubePrefab;
     [SerializeField] private int _spawnCount = 50;
 
     private Queue<Cube> _pooledObject = new Queue<Cube>();
@@ -15,9 +15,9 @@ public class CubePool : MonoBehaviour
         for (int i = 0; i < _spawnCount; i++)
         {
             var newPoolElement = Instantiate(_cubePrefab, transform);
-            newPoolElement.SetActive(false);
+            newPoolElement.gameObject.SetActive(false);
 
-            _pooledObject.Enqueue(newPoolElement.GetComponent<Cube>());    
+            _pooledObject.Enqueue(newPoolElement);    
         }
     }
 
