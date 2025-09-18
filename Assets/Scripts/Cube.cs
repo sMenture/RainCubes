@@ -1,30 +1,48 @@
 
+using System;
 using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(MeshRenderer))]
 public class Cube : MonoBehaviour
 {
-    private bool isHit = false;
+    public event Action<Cube> PlatformTouched;
+
+    private bool _isHit = false;
+    private MeshRenderer _meshRenderer;
+
+    private void Start()
+    {
+        _meshRenderer = GetComponent<MeshRenderer>();
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
         const int MaximumLifetime = 5;
         const int MinimumLifetime = 5;
 
-        if (isHit) return;
+        if (_isHit)
+            return;
 
-        isHit = true;
+        if (collision.gameObject.GetComponent<Platform>() == null)
+            return;
 
-        UserUtility userUtility = new UserUtility();
+        _isHit = true;
 
-        GetComponent<MeshRenderer>().material.color = userUtility.GenerateRandomColor();
-        StartCoroutine(DisableTimer(userUtility.GetRandomValue(MinimumLifetime, MaximumLifetime)));
+        UpdateColor(UserUtility.GenerateRandomColor());
+        StartCoroutine(DisableTimer(UserUtility.GetRandomValue(MinimumLifetime, MaximumLifetime)));
+    }
+
+    private void UpdateColor(Color newColor)
+    {
+        _meshRenderer.material.color = newColor;
     }
 
     private IEnumerator DisableTimer(int delay)
     {
         yield return new WaitForSeconds(delay);
 
-        gameObject.SetActive(false);
+        UpdateColor(UserUtility.ResetColor());
+        PlatformTouched?.Invoke(this);
     }
 }

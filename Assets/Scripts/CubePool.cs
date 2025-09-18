@@ -8,7 +8,6 @@ public class CubePool : MonoBehaviour
     [SerializeField] private int _spawnCount = 50;
 
     private Queue<GameObject> _pooledObject = new Queue<GameObject>();
-    private List<GameObject> _objectsUsed = new List<GameObject>();
 
     private void Awake()
     {
@@ -21,34 +20,26 @@ public class CubePool : MonoBehaviour
         }
     }
 
-
-    private void Update()
+    public bool CheckDequeueElememt()
     {
-        for (int i = _objectsUsed.Count - 1; i >= 0; i--)
-        {
-            var selected = _objectsUsed[i];
-
-            if (selected.activeInHierarchy == false)
-            {
-                _objectsUsed.RemoveAt(i);
-                _pooledObject.Enqueue(selected);
-            }
-        }
-    }
-
-    public bool TryGetElement(out GameObject gameObject)
-    {
-        gameObject = null;
-
         if (_pooledObject.Count == 0)
             return false;
 
+        return true;
+    }
+
+    public GameObject GetElement()
+    {
         var firstPoolElement = _pooledObject.Dequeue();
-        _objectsUsed.Add(firstPoolElement);
 
         firstPoolElement.SetActive(true);
-        gameObject = firstPoolElement;
 
-        return true;
+        return firstPoolElement;
+    }
+
+    public void ReturnToPool(GameObject gameObject)
+    {
+        gameObject.SetActive(false);
+        _pooledObject.Enqueue(gameObject);
     }
 }

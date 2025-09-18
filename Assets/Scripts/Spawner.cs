@@ -9,8 +9,6 @@ public class Spawner : MonoBehaviour
     [SerializeField] private int _powerDispersion;
     [SerializeField] private float _spawnDelay = 1;
 
-    private UserUtility _userUtility = new UserUtility();
-
     private void Start()
     {
         StartCoroutine(Rain());
@@ -20,7 +18,7 @@ public class Spawner : MonoBehaviour
     {
         var wait = new WaitForSeconds(_spawnDelay);
 
-        while (true)
+        while (enabled)
         {
             CreateCube();
 
@@ -30,10 +28,23 @@ public class Spawner : MonoBehaviour
 
     private void CreateCube()
     {
-        if(_cubePool.TryGetElement(out var gameObject))
+        if (_cubePool.CheckDequeueElememt())
         {
-            gameObject.transform.rotation = _userUtility.GetRandomRotation();
-            gameObject.transform.position = _userUtility.GetRandomDispersionByPosition(transform.position, _powerDispersion);
+            GameObject poolElement = _cubePool.GetElement();
+
+            poolElement.transform.rotation = UserUtility.GetRandomRotation();
+            poolElement.transform.position = UserUtility.GetRandomDispersionByPosition(transform.position, _powerDispersion);
+
+            if (poolElement.TryGetComponent<Cube>(out var cube))
+            {
+                cube.PlatformTouched += ReturnCubeToPool;
+            }
         }
+    }
+
+    private void ReturnCubeToPool(Cube cube)
+    {
+        cube.PlatformTouched -= ReturnCubeToPool;
+        _cubePool.ReturnToPool(cube.gameObject);
     }
 }
