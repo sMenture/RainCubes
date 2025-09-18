@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections;
 using UnityEngine;
@@ -6,12 +5,12 @@ using UnityEngine;
 [RequireComponent(typeof(MeshRenderer))]
 public class Cube : MonoBehaviour
 {
-    public event Action<Cube> PlatformTouched;
-
     private bool _isHit = false;
     private MeshRenderer _meshRenderer;
 
-    private void Start()
+    public event Action<Cube> PlatformTouched;
+
+    private void Awake()
     {
         _meshRenderer = GetComponent<MeshRenderer>();
     }
@@ -24,13 +23,13 @@ public class Cube : MonoBehaviour
         if (_isHit)
             return;
 
-        if (collision.gameObject.GetComponent<Platform>() == null)
-            return;
+        if (collision.gameObject.TryGetComponent<Platform>(out var touchPlatform))
+        {
+            _isHit = true;
 
-        _isHit = true;
-
-        UpdateColor(UserUtility.GenerateRandomColor());
-        StartCoroutine(DisableTimer(UserUtility.GetRandomValue(MinimumLifetime, MaximumLifetime)));
+            UpdateColor(UserUtility.GenerateRandomColor());
+            StartCoroutine(DisableTimer(UserUtility.GetRandomValue(MinimumLifetime, MaximumLifetime)));
+        }
     }
 
     private void UpdateColor(Color newColor)
@@ -42,6 +41,7 @@ public class Cube : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
 
+        _isHit = false;
         UpdateColor(UserUtility.ResetColor());
         PlatformTouched?.Invoke(this);
     }

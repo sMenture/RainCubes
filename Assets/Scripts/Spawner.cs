@@ -28,23 +28,20 @@ public class Spawner : MonoBehaviour
 
     private void CreateCube()
     {
-        if (_cubePool.CheckDequeueElememt())
+        if (_cubePool.CanReturnDequeueElememt)
         {
-            GameObject poolElement = _cubePool.GetElement();
+            Cube poolElement = _cubePool.GiveElement();
 
             poolElement.transform.rotation = UserUtility.GetRandomRotation();
             poolElement.transform.position = UserUtility.GetRandomDispersionByPosition(transform.position, _powerDispersion);
 
-            if (poolElement.TryGetComponent<Cube>(out var cube))
-            {
-                cube.PlatformTouched += ReturnCubeToPool;
-            }
+            poolElement.PlatformTouched += ReturnCubeToPool;
         }
     }
 
     private void ReturnCubeToPool(Cube cube)
     {
         cube.PlatformTouched -= ReturnCubeToPool;
-        _cubePool.ReturnToPool(cube.gameObject);
+        _cubePool.ReturnToPool(cube);
     }
 }

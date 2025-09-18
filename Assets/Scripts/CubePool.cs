@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Pool;
 
 public class CubePool : MonoBehaviour
 {
     [SerializeField] private GameObject _cubePrefab;
     [SerializeField] private int _spawnCount = 50;
 
-    private Queue<GameObject> _pooledObject = new Queue<GameObject>();
+    private Queue<Cube> _pooledObject = new Queue<Cube>();
+
+    public bool CanReturnDequeueElememt => _pooledObject.Count > 0;
 
     private void Awake()
     {
@@ -16,30 +17,22 @@ public class CubePool : MonoBehaviour
             var newPoolElement = Instantiate(_cubePrefab, transform);
             newPoolElement.SetActive(false);
 
-            _pooledObject.Enqueue(newPoolElement);    
+            _pooledObject.Enqueue(newPoolElement.GetComponent<Cube>());    
         }
     }
 
-    public bool CheckDequeueElememt()
-    {
-        if (_pooledObject.Count == 0)
-            return false;
-
-        return true;
-    }
-
-    public GameObject GetElement()
+    public Cube GiveElement()
     {
         var firstPoolElement = _pooledObject.Dequeue();
 
-        firstPoolElement.SetActive(true);
+        firstPoolElement.gameObject.SetActive(true);
 
         return firstPoolElement;
     }
 
-    public void ReturnToPool(GameObject gameObject)
+    public void ReturnToPool(Cube cube)
     {
-        gameObject.SetActive(false);
-        _pooledObject.Enqueue(gameObject);
+        cube.gameObject.SetActive(false);
+        _pooledObject.Enqueue(cube);
     }
 }
